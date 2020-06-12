@@ -1,6 +1,6 @@
 import DashboardLayout from "@/pages/Layout/DashboardLayout.vue";
 
-import Dashboard from "@/pages/Dashboard.vue";
+import IPService from "@/pages/IPService.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import TableList from "@/pages/TableList.vue";
 import Typography from "@/pages/Typography.vue";
@@ -13,12 +13,12 @@ const routes = [
   {
     path: "/",
     component: DashboardLayout,
-    redirect: "/dashboard",
+    redirect: "/ipservice",
     children: [
       {
-        path: "dashboard",
-        name: "Dashboard",
-        component: Dashboard
+        path: "ipservice",
+        name: "知识产权服务",
+        component: IPService
       },
       {
         path: "user",

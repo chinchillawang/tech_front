@@ -47,11 +47,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "Vue MD"
-    },
-    sidebarBackgroundImage: {
-      type: String,
-      default: require("@/assets/img/sidebar-2.jpg")
+      default: "科技大数据"
     },
     imgLogo: {
       type: String,
