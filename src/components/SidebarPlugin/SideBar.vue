@@ -1,10 +1,5 @@
 <template>
-  <div
-    class="sidebar"
-    :data-color="sidebarItemColor"
-    :data-image="sidebarBackgroundImage"
-    :style="sidebarStyle"
-  >
+  <div class="sidebar" :data-color="sidebarItemColor" :style="sidebarStyle">
     <div class="logo">
       <a href="#" class="simple-text logo-mini">
         <div class="logo-img">
@@ -61,6 +56,10 @@ export default {
         return acceptedValues.indexOf(value) !== -1;
       }
     },
+    sidebarBackgroundColor: {
+      type: String,
+      default: "#ffffff"
+    },
     sidebarLinks: {
       type: Array,
       default: () => []
@@ -78,7 +77,7 @@ export default {
   computed: {
     sidebarStyle() {
       return {
-        backgroundImage: `url(${this.sidebarBackgroundImage})`
+        background: this.sidebarBackgroundColor
       };
     }
   }

@@ -2,7 +2,10 @@
   <div class="wrapper" :class="{ 'nav-open': $sidebar.showSidebar }">
     <notifications></notifications>
 
-    <side-bar :sidebar-item-color="sidebarBackground">
+    <side-bar
+      :sidebar-item-color="sidebarItemColor"
+      :sidebar-background-color="sidebarBackground"
+    >
       <mobile-menu slot="content"></mobile-menu>
       <sidebar-link to="/ipservice">
         <md-icon>dashboard</md-icon>
@@ -64,7 +67,8 @@ export default {
   },
   data() {
     return {
-      sidebarBackground: "purple"
+      sidebarBackground: "white",
+      sidebarItemColor: "purple"
     };
   }
 };

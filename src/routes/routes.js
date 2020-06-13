@@ -1,6 +1,6 @@
 import DashboardLayout from "@/pages/Layout/DashboardLayout.vue";
 
-import IPService from "@/pages/IPService.vue";
+import IPService from "@/pages/IPService/IPService.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import TableList from "@/pages/TableList.vue";
 import Typography from "@/pages/Typography.vue";
