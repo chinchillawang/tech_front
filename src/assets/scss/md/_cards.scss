@@ -242,6 +242,12 @@
         @include shadow-big-color($brand-danger);
     }
 
+    [data-background-color="myPurple"],
+    .md-tabs.md-danger .md-tabs-navigation{
+        background: linear-gradient(60deg, $purple-500, $purple-500);
+        @include shadow-big-color($brand-myPurple);
+    }
+
     [data-background-color]{
         color: $white-color;
 

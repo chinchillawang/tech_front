@@ -1,18 +1,36 @@
 <template>
-  <div>
-    <div>
-      <p>fuck</p>
-    </div>
-    <div class="graphcontainer" style="width: 500px;height: 650px;"></div>
-  </div>
+  <md-card>
+    <md-card-header :data-background-color="dataBackgroundColor">
+      <h4 class="title">
+        <a class="card-title" href="#">
+          {{ this.keyword }}相关科技资源关联关系
+        </a>
+      </h4>
+    </md-card-header>
+    <md-card-content>
+      <div class="container" id="container"></div>
+    </md-card-content>
+  </md-card>
 </template>
 
 <script>
 import * as d3 from "d3";
 export default {
-  name: "PatentKG",
+  name: "kg-card",
+  props: {
+    dataBackgroundColor: {
+      type: String,
+      default: ""
+    },
+    keyword: {
+      type: String,
+      default: ""
+    }
+  },
   data() {
     return {
+      width: 600,
+      height: 450,
       colorList: [
         "#6fce7a",
         "#ff8373",
@@ -21,158 +39,66 @@ export default {
         "#70d3bd",
         "#ea91b0"
       ],
-      svg: null,
-      timer: null,
-      editor: null,
+      links: [],
+      nodes: [],
+      nodesText: [],
+      CountText: [],
+      linksText: [],
       simulation: null,
-      linkGroup: null,
-      linktextGroup: null,
-      nodeGroup: null,
-      nodetextGroup: null,
-      nodesymbolGroup: null,
-      nodebuttonGroup: null,
-      nodebuttonAction: "",
-      txx: {},
-      tyy: {},
-      graph: {
+      testGraph: {
         nodes: [],
         links: []
       }
     };
   },
-  mounted() {
+  created() {
     this.getGraphData();
   },
   methods: {
     getGraphData() {
       var _this = this;
-      var urlNode = "/patent_kg/query/人工智能/nodes";
-      var urlLink = "/patent_kg/query/人工智能/links";
+      var urlNode = "/patent_kg/query/" + this.keyword + "/nodes";
+      var urlLink = "/patent_kg/query/" + this.keyword + "/links";
       this.axios.all([this.axios.get(urlNode), this.axios.get(urlLink)]).then(
         this.axios.spread(function(responseNodes, responseLinks) {
-          console.log("responseNodes", responseNodes.data);
-          console.log("responseLinks", responseLinks.data);
-          _this.graph.nodes = responseNodes.data;
-          _this.graph.links = responseLinks.data;
-          _this.initGraph();
+          // console.log(responseNodes.data)
+          // console.log(responseLinks.data)
+          _this.testGraph.nodes = responseNodes.data;
+          _this.testGraph.links = responseLinks.data;
+          _this.initGraph(_this.testGraph);
         })
       );
-    },
-    initGraph_new(data) {
-      var graphcontainer = d3.select(".graphcontainer");
-      var width = graphcontainer._groups[0][0].offsetWidth;
-      var height = graphcontainer._groups[0][0].offsetHeight; //
-      this.svg = graphcontainer.append("svg");
-      this.svg.attr("width", width);
-      this.svg.attr("height", height);
-      this.simulation = d3
-        .forceSimulation()
-        .force(
-          "link",
-          d3
-            .forceLink()
-            .distance(function(d) {
-              return Math.floor(Math.random() * (700 - 200)) + 200;
-            })
-            .id(function(d) {
-              return d.id;
-            })
-        )
-        .force("charge", d3.forceManyBody().strength(-400))
-        .force("collide", d3.forceCollide().strength(-30))
-        .force("center", d3.forceCenter(width / 2, (height - 200) / 2));
-      this.linkGroup = this.svg.append("g").attr("class", "line");
-      this.linktextGroup = this.svg.append("g").attr("class", "linetext");
-      this.nodeGroup = this.svg.append("g").attr("class", "node");
-      this.nodetextGroup = this.svg.append("g").attr("class", "nodetext");
-      this.nodesymbolGroup = this.svg.append("g").attr("class", "nodesymbol");
-      this.nodebuttonGroup = this.svg.append("g").attr("class", "nodebutton");
-      this.addmaker();
-      this.addnodebutton();
-      this.svg.on(
-        "click",
-        function() {
-          d3.selectAll("use").classed("circle_opreate", true);
-        },
-        "false"
-      );
-    },
-    addmaker() {
-      var arrowMarker = this.svg
-        .append("marker")
-        .attr("id", "arrow")
-        .attr("markerUnits", "strokeWidth")
-        .attr("markerWidth", "20") //
-        .attr("markerHeight", "20")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", "22") // 13
-        .attr("refY", "0")
-        .attr("orient", "auto");
-      var arrow_path = "M0,-5L10,0L0,5"; // 定义箭头形状
-      arrowMarker
-        .append("path")
-        .attr("d", arrow_path)
-        .attr("fill", "#fce6d4");
-    },
-    addnodebutton() {
-      var _this = this;
-      var nodebutton = this.svg
-        .append("defs")
-        .append("g")
-        .attr("id", "out_circle");
-      var database = [1, 1, 1, 1, 1];
-      var pie = d3.pie();
-      var piedata = pie(database);
-      var buttonEnter = nodebutton
-        .selectAll(".buttongroup")
-        .data(piedata)
-        .enter()
-        .append("g")
-        .attr("class", function(d, i) {
-          return "action_" + i;
-        });
-      var arc = d3
-        .arc()
-        .innerRadius(30)
-        .outerRadius(60);
-      buttonEnter
-        .append("path")
-        .attr("d", function(d) {
-          return arc(d);
-        })
-        .attr("fill", "#D2D5DA")
-        .style("opacity", 0.6)
-        .attr("stroke", "#f0f0f4")
-        .attr("stroke-width", 2);
-      buttonEnter
-        .append("text")
-        .attr("transform", function(d, i) {
-          return "translate(" + arc.centroid(d) + ")";
-        })
-        .attr("text-anchor", "middle")
-        .text(function(d, i) {
-          var zi = new Array();
-          zi[0] = "编辑";
-          zi[1] = "展开";
-          zi[2] = "追加";
-          zi[3] = "连线";
-          zi[4] = "删除";
-          return zi[i];
-        })
-        .attr("font-size", 10);
+      // .then(this.axios.spread(function (nodes, links){}) {
+      //   _this.testGraph.nodes = response.data
+      //   _this.initGraph(_this.testGraph)
+      //   // console.log(_this.response)
+      // })
+      // .catch(function (error) {
+      //   console.log(error)
+      // })
+      // url = '/patent_kg/query/人工智能/links'
+      // this.axios.get(url)
+      //   .then(function (response) {
+      //     _this.testGraph['links'] = response.data
+      //     // _this.initGraph(_this.testGraph)
+      //     // console.log(_this.response)
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error)
+      //   })
+      // _this.initGraph(_this.testGraph)
+      // console.log(_this.testGraph)
     },
 
-    initGraph() {
+    initGraph(data) {
       var _this = this;
-      console.log("testGraph", _this.graph.nodes);
-      var nodes = _this.graph.nodes.map(d => Object.create(d));
-      var links = _this.graph.links.map(d => Object.create(d));
+      console.log(_this.testGraph);
+      console.log(data.nodes);
+      const nodes = data.nodes.map(d => Object.create(d));
+      const links = data.links.map(d => Object.create(d));
 
-      for (let i = 0; i < nodes.length; i++) {
-        console.log("node", nodes[i].x);
-      }
-      console.log("linkes", links);
-      console.log("nodes", nodes);
+      console.log(links);
+      console.log(nodes);
 
       _this.simulation = d3
         .forceSimulation(nodes)
@@ -181,37 +107,35 @@ export default {
           d3
             .forceLink(links)
             .id(d => d.id)
-            .distance(150)
+            .distance(100)
         )
         .force(
           "collide",
           d3.forceCollide().radius(() => 80)
         )
-        .force("charge", d3.forceManyBody().strength(-10))
+        .force("charge", d3.forceManyBody().strength(-500))
         .force("center", d3.forceCenter(_this.width / 2, _this.height / 2));
 
-      var graphcontainer = d3.select(".graphcontainer");
-      console.log("graphcontainer", graphcontainer);
-      var width = graphcontainer._groups[0][0].offsetWidth;
-      var height = graphcontainer._groups[0][0].offsetHeight;
-      console.log(width);
-      console.log(height);
-      _this.svg = graphcontainer.append("svg");
-      _this.svg.attr("width", width);
-      _this.svg.attr("height", height);
-      _this.svg.attr("viewBox", [0, 0, width, height]);
-      // const svg = d3
-      //   .select(".container")
-      //   .append("svg")
-      //   .attr("viewBox", [50, 50, _this.width, _this.height]);
-      _this.svg.call(
+      var container = d3.select(".container");
+      _this.width = container._groups[0][0].offsetWidth;
+      // _this.height = container._groups[0][0].offsetHeight;
+      console.log(_this.width);
+      console.log(_this.height);
+
+      const svg = d3
+        .select(".container")
+        .append("svg")
+        .attr("width", _this.width)
+        .attr("height", _this.height)
+        .attr("viewBox", [0, 0, _this.width, _this.height]);
+      svg.call(
         d3.zoom().on("zoom", function() {
           g.attr("transform", d3.event.transform);
         })
       );
 
       // eslint-disable-next-line no-unused-vars
-      const positiveMarker = _this.svg
+      const positiveMarker = svg
         .append("marker")
         .attr("id", "positiveMarker")
         .attr("orient", "auto")
@@ -228,7 +152,7 @@ export default {
         .attr("fill", "#999999")
         .attr("stoke-opacity", 0.6);
       // eslint-disable-next-line no-unused-vars
-      const negativeMarker = _this.svg
+      const negativeMarker = svg
         .append("marker")
         .attr("id", "negativeMarker")
         .attr("orient", "auto")
@@ -245,7 +169,7 @@ export default {
         .attr("fill", "#999999")
         .attr("stoke-opacity", 0.6);
 
-      const g = _this.svg.append("g");
+      const g = svg.append("g");
 
       _this.links = g
         .append("g")
@@ -320,7 +244,8 @@ export default {
         .data(nodes)
         .join("text")
         .text(function(d) {
-          return d.id; // 效果与d => d.id相同
+          if (d.id === d.object) return d.id;
+          return d.id + "\n(" + d.object + ")"; // 效果与d => d.id相同
         })
         .style("text-anchor", function(d) {
           return "middle";
@@ -329,7 +254,9 @@ export default {
         //   return this.getBoundingClientRect().width / 2 * (-1)
         // })
         // .attr('dx', -50)
-        .attr("dy", 45)
+        .attr("dy", 50)
+        .attr("font-size", 18)
+        .attr("font-weight", "bold")
         .attr("class", "node-text");
 
       _this.simulation.on("tick", () => {
@@ -505,7 +432,119 @@ export default {
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended);
+    },
+
+    queryNode(d) {
+      var _this = this;
+      let data = {};
+      for (var element in d.object) {
+        let isArray = d.object[element] instanceof Array;
+        if (!isArray) {
+          data[element] = d.object[element];
+        }
+      }
+      _this.$refs.detailPanel.currentNode = data;
+      // console.log(_this.$refs.detailPanel.currentNode)
+      // console.log(d.object)
+      var url = "person/actedby/" + d.id;
+      this.axios
+        .get(url)
+        .then(function(response) {
+          if (response.status === 200) {
+            for (var i = 0; i < response.data.length; i++) {
+              let flag = true;
+              for (var j = 0; j < _this.testGraph.nodes.length; j++) {
+                if (_this.testGraph.nodes[j].id === response.data[i].id) {
+                  flag = false;
+                  break;
+                }
+              }
+              if (flag) {
+                _this.testGraph.nodes.push(response.data[i]);
+                _this.testGraph.links.push({
+                  source: d.id,
+                  target: response.data[i].id,
+                  value: 5,
+                  relationship: "ACTED_IN"
+                });
+              }
+            }
+            _this.updateGraph(_this.testGraph);
+            // console.log(_this.testGraph)
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
+
+    selectNode(d) {
+      var _this = this;
+      let data = {};
+      for (var element in d.object) {
+        let isArray = d.object[element] instanceof Array;
+        if (!isArray) {
+          data[element] = d.object[element];
+        }
+      }
+      _this.$refs.detailPanel.currentNode = data;
+      _this.$refs.detailPanel.isShow = true;
+    },
+
+    getQueryResult(result, currentNode, currentType) {
+      for (var i = 0; i < result.length; i++) {
+        let flag = true;
+        // let templinks = {
+        //   'source': currentNode.name,
+        //   'target': result[i].id,
+        //   'value': 5,
+        //   'relationship': currentType
+        // }
+        for (var j = 0; j < this.testGraph.nodes.length; j++) {
+          if (this.testGraph.nodes[j].id === result[i].id) {
+            flag = false;
+            break;
+          }
+        }
+        if (flag) {
+          this.testGraph.nodes.push(result[i]);
+        } else {
+        }
+        this.testGraph.links.push({
+          source: currentNode.name,
+          target: result[i].id,
+          value: 5,
+          relationship: currentType
+        });
+      }
+      for (i = this.testGraph.links.length - 1; i >= 0; i--) {
+        if (
+          this.testGraph.links[i].source.id === currentNode.name &&
+          this.testGraph.links[i].relationship !== currentType
+        ) {
+          let isRemove = true;
+          for (var k = 0; k < result.length; k++) {
+            if (result[k].id === this.testGraph.links[i].target.id) {
+              isRemove = false;
+              break;
+            }
+          }
+          if (isRemove) {
+            for (k = this.testGraph.nodes.length - 1; k >= 0; k--) {
+              if (
+                this.testGraph.nodes[k].id === this.testGraph.links[i].target.id
+              ) {
+                this.testGraph.nodes.splice(k, 1);
+              }
+            }
+          }
+          this.testGraph.links.splice(i, 1);
+        }
+      }
+      this.updateGraph(this.testGraph);
+      // console.log(_this.testGraph)
     }
   }
 };
 </script>
+<style></style>

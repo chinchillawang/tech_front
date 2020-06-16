@@ -10,7 +10,7 @@
             <md-input v-model="keyword" type="text"></md-input>
           </md-field>
           <md-button
-            class="md-layout-item md-size-20"
+            class="md-layout-item md-size-20 md-mypurple"
             @click="search"
           >
             搜索
@@ -23,17 +23,43 @@
 <script>
 export default {
   name: "search-card",
-  props: {
-    dataBackgroundColor: {
-      type: String,
-      default: ""
-    }
-  },
   data() {
     return {
       keyword: ""
     };
+  },
+  methods: {
+    search() {
+      var _this = this;
+      this.$emit("getKeyword", this.keyword);
+      this.axios
+        .get("/patent/all")
+        .then(function(response) {
+          if (response.status === 200) {
+            console.log(response.data);
+            _this.$emit("getPatentList", response.data);
+            //   for (
+            //     var i = _this.pageSize * (_this.currentPage - 1);
+            //     i < _this.pageSize * _this.currentPage;
+            //     i++
+            //   ) {
+            //     if (i >= _this.patents.length) {
+            //       break;
+            //     }
+            //     _this.visiblePatents.push(_this.patents[i]);
+            //   }
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    }
   }
 };
 </script>
-<style></style>
+<style lang="scss" scoped>
+.md-button {
+  height: 50px;
+  background-color: #9c27b0 !important;
+}
+</style>

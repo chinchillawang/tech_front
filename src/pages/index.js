@@ -9,5 +9,6 @@ export { UserCard, EditProfileForm };
 //IPService组件
 import SearchCard from "../pages/IPService/SearchCard.vue";
 import PatentCard from "../pages/IPService/PatentCard.vue";
+import KgCard from "../pages/IPService/KgCard.vue";
 
-export { SearchCard, PatentCard };
+export { SearchCard, PatentCard, KgCard };

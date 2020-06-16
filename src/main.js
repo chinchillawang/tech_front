@@ -21,6 +21,13 @@ import App from "./App";
 // router setup
 import routes from "./routes/routes";
 
+//axios 配置
+import axios from "axios";
+import VueAxios from "vue-axios";
+axios.defaults.baseURL = "/api";
+axios.defaults.withCredentials = true;
+Vue.use(VueAxios, axios);
+
 // Plugins
 import GlobalComponents from "./globalComponents";
 import GlobalDirectives from "./globalDirectives";

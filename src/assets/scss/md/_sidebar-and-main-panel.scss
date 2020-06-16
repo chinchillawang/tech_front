@@ -290,6 +290,9 @@
     &[data-color="purple"]{
         @include set-background-color-button($brand-primary);
     }
+    &[data-color="myPurple"]{
+      @include set-background-color-button($brand-myPurple);
+  }
 }
 
 .off-canvas-sidebar{
